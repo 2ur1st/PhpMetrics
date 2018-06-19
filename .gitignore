@@ -8,4 +8,3 @@ provision.sh
 /nbproject
 phpmetrics.yml.dist
 log
-Dockerfile
