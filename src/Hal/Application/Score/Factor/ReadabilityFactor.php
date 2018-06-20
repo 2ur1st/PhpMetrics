@@ -18,7 +18,15 @@ use Hal\Component\Result\ResultCollection;
  *
  * @author Jean-François Lépine <https://twitter.com/Halleck45>
  */
-class ReadabilityFactor implements FactorInterface {
+class ReadabilityFactor implements FactorInterface
+{
+    private const DIFFICULTY_GOOD_BOUND = 5.8;
+
+    private const DIFFICULTY_BAD_BOUND = 18;
+
+    private const COMMENT_WEIGHT_GOOD_BOUND = 42;
+
+    private const COMMENT_WEIGHT_BAD_BOUND = 32;
 
     /**
      * Bounds
@@ -40,10 +48,13 @@ class ReadabilityFactor implements FactorInterface {
     /**
      * @inheritdoc
      */
-    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound) {
+    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound)
+    {
+        $difficultyBadBound = getenv('READABILITY_FACTOR_DIFFICULTY_BAD_BOUND') ?: self::DIFFICULTY_BAD_BOUND;
+        $commentWeightBadBound = getenv('READABILITY_FACTOR_COMMENT_WEIGHT_BAD_BOUND') ?: self::COMMENT_WEIGHT_BAD_BOUND;
         $notes = array(
-            $this->calculator->lowIsBetter(5.8, 18, $bound->getAverage('difficulty'))
-            , $this->calculator->highIsBetter(42, 32, $bound->getAverage('commentWeight'))
+            $this->calculator->lowIsBetter(self::DIFFICULTY_GOOD_BOUND, $difficultyBadBound, $bound->getAverage('difficulty')),
+            $this->calculator->highIsBetter(self::COMMENT_WEIGHT_GOOD_BOUND, $commentWeightBadBound, $bound->getAverage('commentWeight'))
         );
         return round(array_sum($notes) / count($notes, COUNT_NORMAL), 2);
     }
@@ -51,7 +62,8 @@ class ReadabilityFactor implements FactorInterface {
     /**
      * @inheritedDoc
      */
-    public function getName() {
+    public function getName()
+    {
         return 'Accessibility for new developers';
     }
 }

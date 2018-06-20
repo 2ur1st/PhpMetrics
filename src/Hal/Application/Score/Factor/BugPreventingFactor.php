@@ -18,7 +18,12 @@ use Hal\Component\Result\ResultCollection;
  *
  * @author Jean-François Lépine <https://twitter.com/Halleck45>
  */
-class BugPreventingFactor implements FactorInterface {
+class BugPreventingFactor implements FactorInterface
+{
+
+    private const GOOD_BOUND = 0.09;
+
+    private const BAD_BOUND = 0.70;
 
     /**
      * Bounds
@@ -40,14 +45,17 @@ class BugPreventingFactor implements FactorInterface {
     /**
      * @inheritdoc
      */
-    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound) {
-        return round($this->calculator->lowIsBetter(0.09, 0.70, $bound->getAverage('bugs')), 2);
+    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound)
+    {
+        $badBound = getenv('BUG_PREVENTING_FACTOR_BAD_BOUND') ?: self::BAD_BOUND;
+        return round($this->calculator->lowIsBetter(self::GOOD_BOUND, $badBound, $bound->getAverage('bugs')), 2);
     }
 
     /**
      * @inheritedDoc
      */
-    public function getName() {
+    public function getName()
+    {
         return 'Reducing bug\'s probability';
     }
 }

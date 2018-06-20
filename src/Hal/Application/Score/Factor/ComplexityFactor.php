@@ -18,7 +18,12 @@ use Hal\Component\Result\ResultCollection;
  *
  * @author Jean-François Lépine <https://twitter.com/Halleck45>
  */
-class ComplexityFactor implements FactorInterface {
+class ComplexityFactor implements FactorInterface
+{
+
+    private const GOOD_BOUND = 1;
+
+    private const BAD_BOUND = 8;
 
     /**
      * Bounds
@@ -40,14 +45,17 @@ class ComplexityFactor implements FactorInterface {
     /**
      * @inheritdoc
      */
-    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound) {
-        return round($this->calculator->lowIsBetter(1, 8, $bound->getAverage('cyclomaticComplexity')), 2);
+    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound)
+    {
+        $badBound = getenv('COMPLEXITY_FACTOR_BAD_BOUND') ?: self::BAD_BOUND;
+        return round($this->calculator->lowIsBetter(self::GOOD_BOUND, $badBound, $bound->getAverage('cyclomaticComplexity')), 2);
     }
 
     /**
      * @inheritedDoc
      */
-    public function getName() {
+    public function getName()
+    {
         return 'Simplicity of algorithms';
     }
 }

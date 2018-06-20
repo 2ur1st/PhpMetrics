@@ -18,7 +18,20 @@ use Hal\Component\Result\ResultCollection;
  *
  * @author Jean-François Lépine <https://twitter.com/Halleck45>
  */
-class VolumeFactor implements FactorInterface {
+class VolumeFactor implements FactorInterface
+{
+
+    private const LOC_GOOD_BOUND = 65;
+
+    private const LOC_BAD_BOUND = 154;
+
+    private const LOGICAL_LOC_GOOD_BOUND = 9;
+
+    private const LOGICAL_LOC_BAD_BOUND = 30;
+
+    private const VOCABULARY_LOC_GOOD_BOUND = 27;
+
+    private const VOCABULARY_LOC_BAD_BOUND = 59;
 
     /**
      * Bounds
@@ -40,11 +53,16 @@ class VolumeFactor implements FactorInterface {
     /**
      * @inheritdoc
      */
-    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound) {
+    public function calculate(ResultCollection $collection, ResultCollection $groupedResults, ResultInterface $bound)
+    {
+        $locBadBound = getenv('VOLUME_FACTOR_LOC_BAD_BOUND') ?: self::LOC_BAD_BOUND;
+        $logicalLocBadBound = getenv('VOLUME_FACTOR_LOGICAL_LOC_BAD_BOUND') ?: self::LOGICAL_LOC_BAD_BOUND;
+        $vocabularyBadBound = getenv('VOLUME_FACTOR_VOCABULARY_BAD_BOUND') ?: self::VOCABULARY_LOC_BAD_BOUND;
+
         $notes = array(
-            $this->calculator->lowIsBetter(65, 154, $bound->getAverage('loc'))
-        , $this->calculator->highIsBetter(9, 30, $bound->getAverage('logicalLoc'))
-        , $this->calculator->highIsBetter(27, 59, $bound->getAverage('vocabulary'))
+            $this->calculator->lowIsBetter(self::LOC_GOOD_BOUND, $locBadBound, $bound->getAverage('loc')),
+            $this->calculator->highIsBetter(self::LOGICAL_LOC_GOOD_BOUND, $logicalLocBadBound, $bound->getAverage('logicalLoc')),
+            $this->calculator->highIsBetter(self::VOCABULARY_LOC_GOOD_BOUND, $vocabularyBadBound, $bound->getAverage('vocabulary'))
         );
         return round(array_sum($notes) / count($notes, COUNT_NORMAL), 2);
     }
@@ -52,7 +70,8 @@ class VolumeFactor implements FactorInterface {
     /**
      * @inheritedDoc
      */
-    public function getName() {
+    public function getName()
+    {
         return 'Volume';
     }
 }
